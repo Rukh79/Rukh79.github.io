@@ -76,7 +76,7 @@ section{padding-left:var(--pad);padding-right:var(--pad)}
 
 /* hero */
 .hero{min-height:100vh;min-height:100svh;display:flex;align-items:flex-end;background:var(--sky);color:#fff;padding-bottom:clamp(40px,9vh,110px)}
-h1{font-family:var(--serif);font-weight:300;font-size:clamp(68px,12.5vw,230px);line-height:.88;letter-spacing:-.03em;margin:0 0 .22em -.04em;font-variation-settings:'opsz' 72}
+h1{font-family:var(--serif);font-weight:300;font-size:clamp(68px,min(12.5vw,21vh),230px);line-height:.88;letter-spacing:-.03em;margin:0 0 .22em -.04em;font-variation-settings:'opsz' 72}
 .lede{font-size:clamp(20px,2vw,28px);line-height:1.32;max-width:23em;margin:0 0 .7em}
 .sub{font-size:16px;line-height:1.5;opacity:.82;max-width:32em;margin:0}
 
@@ -601,7 +601,7 @@ h3{font-family:var(--serif);font-weight:400;font-size:26px;letter-spacing:-.01em
   }
 
   // ---------- layout
-  let W = 0, H = 0, DPR = 1, tops = [], hts = [];
+  let W = 0, H = 0, DPR = 1, tops = [], hts = [], nameTop = 0;
   function measure() {
     DPR = Math.min(devicePixelRatio || 1, 2);
     W = innerWidth; H = innerHeight;
@@ -609,10 +609,17 @@ h3{font-family:var(--serif);font-weight:400;font-size:26px;letter-spacing:-.01em
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     tops = secs.map(s => s.getBoundingClientRect().top + scrollY);
     hts = secs.map(s => s.offsetHeight);
+    nameTop = document.querySelector('.hero h1').getBoundingClientRect().top + scrollY;
   }
   function stage(name) {
     const m = W < 900;
-    if (name === 'cloud' || name === 'cloud2') return m ? [W * .5, H * .3, W * .42] : [W * .67, H * .38, Math.min(W * .24, H * .45)];
+    if (name === 'cloud' || name === 'cloud2') {
+      if (m) return [W * .5, H * .3, W * .42];
+      let s = Math.min(W * .24, H * .45), y = H * .38;
+      // hero cloud on short screens: shrink and lift it so it and its caption clear the name
+      if (name === 'cloud') { s = Math.min(s, Math.max(60, (nameTop - 105) / .98)); y = Math.min(y, nameTop - 35 - s * .32); }
+      return [W * .67, y, s];
+    }
     if (name === 'dust') return [W * .5, H * .5, Math.max(W, H) * .62];
     return m ? [W * .5, H * .27, Math.min(W * .34, H * .2)] : [W * .27, H * .5, Math.min(W * .18, H * .33)];
   }
